@@ -17,49 +17,57 @@
 		</Table>
 		<NConfigProvider v-if="currentItem && currentTemplate" :theme="null">
 			<NFlex class="printTemplate printable" vertical>
-				<NFlex justify="space-between">
-					<NQrCode v-if="currentItem.id" :value="currentItem.id" :size="80" />
-					<img @click="onClickClosePrint" src="/chuo.png" alt="Logo" height="150">
+				<NFlex justify="space-between" style="cursor: pointer;" @click="onClickClosePrint">
 					<div>
-						<strong>Service des Urgences</strong>
-						<p>Créé le:
-							<NTime :time="currentItem.createdAt" type="date" />
-						</p>
-						<p v-if="currentItem.updatedAt">Modifié le:
-							<NTime :time="currentItem.updatedAt" type="date" />
-						</p>
+						Royaume du Maroc<br />
+						Ministère de la Santé et de la Protection Sociale<br />
+						CHU Mohammed VI Oujda
+					</div>
+					<NQrCode v-if="currentItem.id"
+						:value="`https://urgences.inicontent.com/admin/tables/urgences/${currentItem.id}`" :size="80" />
+					<!-- <img src="/chuo.jpeg" alt="Logo" height="100"> -->
+					<div>
+						المملكة المغربية<br />
+						وزارة الصحة والحماية الاجتماعية<br />
+						المركز الاستشفائي الجامعي محمد السادس وجدة
 					</div>
 				</NFlex>
 				<NH1 style="margin: 0;">{{printingOptions.find(option => option.key === currentTemplate)?.label}} de {{
-					currentItem.nom_complet }}</NH1>
-				<NH2 style="margin: 0;">{{ currentItem.nom_complet }}</NH2>
+					currentItem.patient.nom_complet }}</NH1>
 				<table>
 					<tbody>
 						<tr>
 							<th>Nom Complet</th>
-							<th>IP</th>
-							<th>CIN</th>
+							<th v-if="currentItem.patient.IP || currentItem.patient.CIN">{{ currentItem.patient.IP ?
+								'IP' :
+								currentItem.patient.CIN ? 'CIN' : '' }}</th>
 							<th>Date de naissance</th>
+							<th>Couverture Sanitaire</th>
 						</tr>
 						<tr>
-							<td>{{ currentItem.nom_complet ?? '--' }}</td>
-							<td>{{ currentItem.IP ?? '--' }}</td>
-							<td>{{ currentItem.CIN ?? '--' }}</td>
-							<td v-if="currentItem.date_de_naissance">
-								{{ new Date(currentItem.date_de_naissance).toLocaleDateString('fr-FR') }}
-								({{ Math.floor((Date.now() - new Date(currentItem.date_de_naissance).getTime()) / (1000
-									*
-									60 * 60
-									* 24 * 365.25)) }} ans)
+							<td>{{ currentItem.patient.nom_complet ?? '--' }}</td>
+							<td v-if="currentItem.patient.IP || currentItem.patient.CIN">{{ currentItem.patient.IP ??
+								currentItem.patient.CIN ?? '--' }}</td>
+							<td>
+								{{ new Date(currentItem.patient.date_de_naissance).toLocaleDateString('fr-FR') }}
+								({{ Math.floor((Date.now() - new Date(currentItem.patient.date_de_naissance).getTime())
+									/ (1000
+										*
+										60 * 60
+										* 24 * 365.25)) }} ans)
 							</td>
+							<td>{{ currentItem.patient.couverture_sanitaire ?? '--' }}</td>
 						</tr>
 					</tbody>
 				</table>
-				<LazyDataS style="text-align: left;" :schema="PrintSchema" :value="currentItem" />
-
+				<LazyDataS style="text-align: left;"
+					:schema="patientTable?.schema?.filter(item => item.id && [10].includes(item.id))"
+					:value="currentItem.patient" disableScroll />
+				<LazyDataS style="text-align: left;"
+					:schema="table.schema?.filter(item => item.id && [1, 7, 33].includes(item.id))" :value="currentItem"
+					disableScroll />
 			</NFlex>
 		</NConfigProvider>
-
 	</div>
 </template>
 
@@ -70,25 +78,26 @@ definePageMeta({
 })
 
 const tableRef = ref<TableRef>()
-
+type printTemplates = "observation" | "fiche_de_traitement"
 const currentItem = ref<Item>()
 const currentTemplate = ref<printTemplates>()
 const printingOptions = [{ label: 'Observation', key: 'observation' }, { label: 'Fiche de traitement', key: 'fiche_de_traitement' }]
 let originalTitle: string
-async function printingHandle(value: "observation" | "fiche_de_traitement", data: Item) {
+async function printingHandle(value: printTemplates, data: Item) {
 	currentItem.value = data
 	currentTemplate.value = value
 	originalTitle = document.title
-	document.title = `${printingOptions.find(option => option.key === value)?.label} | ${data.nom_complet}`
+	document.title = `${printingOptions.find(option => option.key === value)?.label} | ${data.patient.nom_complet}`
 }
 function onClickClosePrint() {
 	document.title = originalTitle
 	currentItem.value = undefined
 	currentTemplate.value = undefined
 }
-const PrintSchema = [{ key: 'motif', type: 'string' }, { key: 'ATCD', type: 'string', subType: 'textarea' },
-{ key: 'histoire_de_la_maladie', type: 'string', subType: 'textarea' }
-]
+
+const database = useState<Database>("database");
+const patientTable = database.value.tables?.find(table => table.slug === 'patients')
+const table = useState<Table>("table");
 </script>
 
 <style scoped>

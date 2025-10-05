@@ -9,14 +9,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
-  "dependencies": {
-    "nuxt": "^4.1.1",
-    "vue": "^3.5.20",
-    "vue-router": "^4.5.1"
-  },
   "devDependencies": {
     "inibase": "^1.3.0",
     "inison": "^2.0.1",
-    "naive-ui": "^2.42.0"
+    "naive-ui": "^2.43.1",
+		"nuxt": "^4.1.2",
+		"vue": "^3.5.21"
   }
 }
