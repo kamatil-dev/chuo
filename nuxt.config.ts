@@ -3,7 +3,7 @@ export default defineNuxtConfig({
 	compatibilityDate: "latest",
 	appConfig: {
 		database: "chuo",
-		// fileBase: "https://files.inicontent.com/"
+		fileBase: "https://files.inicontent.com/",
 	},
 	hooks: {
 		"pages:extend"(pages) {
