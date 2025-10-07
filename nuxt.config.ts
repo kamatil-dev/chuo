@@ -23,6 +23,46 @@ export default defineNuxtConfig({
 			);
 		},
 	},
+	pwa: {
+		manifest: {
+			name: "CHU Oujda",
+			short_name: "CHUO",
+			theme_color: "#4664a7",
+			icons: [
+				{
+					src: "/pwa-192x192.png",
+					sizes: "192x192",
+					type: "image/png",
+					purpose: "any",
+				},
+				{
+					src: "/pwa-512x512.png",
+					sizes: "512x512",
+					type: "image/png",
+					purpose: "any",
+				},
+				{
+					src: "/pwa-maskable-192x192.png",
+					sizes: "192x192",
+					type: "image/png",
+					purpose: "maskable",
+				},
+				{
+					src: "/pwa-maskable-512x512.png",
+					sizes: "512x512",
+					type: "image/png",
+					purpose: "maskable",
+				},
+			],
+		},
+		workbox: {
+			navigateFallback: "/",
+		},
+		devOptions: {
+			enabled: true,
+			type: "module",
+		},
+	},
 	extends:
 		process.env.NODE_ENV !== "production"
 			? [["../inicontent", { install: true }]]
