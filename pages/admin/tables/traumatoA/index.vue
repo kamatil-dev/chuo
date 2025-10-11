@@ -509,4 +509,57 @@ watch(showAssetsModal, (newVal) => {
 .traumatoA .printable table {
 	break-after: always;
 }
+
+/* Responsive: hide sidebar on small screens and make printable flow */
+@media (max-width: 767px) {
+
+	/* hide the left side panel on mobile */
+	.printable .side {
+		display: none !important;
+	}
+
+
+	/* restore normal table flow */
+	.traumatoA .printable table {
+		position: relative;
+		width: 100%;
+		border-collapse: collapse;
+		break-after: auto;
+	}
+
+	.traumatoA .printable thead td>div:nth-child(1) {
+		align-items: center;
+		padding-left: 17px;
+		width: 100%;
+		flex-flow: nowrap !important;
+	}
+
+	/* make tbody full width and remove left margin used for desktop layout */
+	.traumatoA .printable tbody {
+		width: 100%;
+		display: block;
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	/* ensure header images scale down */
+	.traumatoA .printable thead img,
+	.traumatoA .printable thead .NFlex img {
+		max-width: 25%;
+		height: auto;
+	}
+
+	/* reduce heavy borders / spacing for mobile readability */
+	.traumatoA .printable td>ul>li,
+	.traumatoA .printable td>ul>div>li {
+		border: none;
+		margin-bottom: 8px;
+		padding: 6px 6px;
+	}
+
+	/* staff box already hidden by .side, but make safe */
+	.printable .staff {
+		display: none;
+	}
+}
 </style>
