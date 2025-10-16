@@ -1,4 +1,4 @@
 export default defineAppConfig({
 	database: "chuo",
-	fileBase: "https://files.inicontent.com/",
+	fileBase: "https://uploads.inicontent.com/",
 });

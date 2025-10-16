@@ -107,25 +107,31 @@
 								</NFlex>
 							</NFlex>
 							<ul style="list-style-type:none;">
-								<li v-if="currentItem.diagnostic"><strong>Diagnostic :</strong> {{
-									currentItem.diagnostic.nom
-								}}</li>
+								<li v-if="currentItem.diagnostic"><strong>Diagnostic{{ currentItem.diagnostic.length > 1
+									? 's' :
+									'' }} :</strong> {{
+											currentItem.diagnostic.map((diag: Item) => diag.nom).join(', ')
+										}}</li>
 								<li v-if="currentItem.patient"><strong>Identité :</strong>
 									<ul style="list-style-type:none;">
 										<li>
 											- Il s'agit d'un{{ currentItem.patient?.sexe === "femme" ? "e" :
 												"" }}
-											patient{{
-												currentItem.patient?.sexe === "femme" ? "e" : "" }} âgé{{
-												currentItem.patient?.sexe
-													===
-													"femme"
-													?
-													"e" : "" }} de {{ Math.floor((new Date().getTime() - new
-												Date(currentItem.patient?.date_de_naissance).getTime()) /
-												31557600000)
-											}}
-											ans<template v-if="currentItem.patient?.origine">, originaire et
+											patient
+											<template
+												v-if="currentItem.patient.age || currentItem.patient.date_de_naissance">{{
+													currentItem.patient?.sexe === "femme" ? "e" : "" }} âgé{{
+													currentItem.patient?.sexe
+														===
+														"femme"
+														?
+														"e" : "" }} de {{ currentItem.patient.age || (Math.floor((new
+													Date().getTime() - new
+														Date(currentItem.patient?.date_de_naissance).getTime()) /
+													31557600000))
+												}}
+												ans</template>
+											<template v-if="currentItem.patient?.origine">, originaire et
 												habitant{{
 													currentItem.patient?.sexe ===
 														"femme" ? "e" : "" }} à {{ currentItem.patient?.origine
@@ -362,7 +368,7 @@
 				</tbody>
 			</table>
 		</NConfigProvider>
-		<NDrawer v-model:show="showAssetsModal" defaultHeight="50%" placement="bottom" resizable>
+		<NDrawer v-model:show="showAssetsModal" defaultHeight="50%" placement="bottom" resizable :closeOnEsc="false">
 			<NDrawerContent id="assetsModal" :nativeScrollbar="false" :bodyContentStyle="{ padding: 0 }">
 				<AssetCard targetID="assetsModal" :suffix="`/${currentItem?.patient?.nom_complet}`" />
 			</NDrawerContent>
@@ -403,8 +409,28 @@ const showAssetsModal = ref(false);
 watch(showAssetsModal, (newVal) => {
 	if (!newVal) currentItem.value = undefined;
 });
+
+// Close print view when Escape key is pressed
+function onKeydown(e: KeyboardEvent) {
+	if (e.key === "Escape" || e.key === "Esc") {
+		// only close if a printable is open
+		if (currentItem.value) onClickClosePrint();
+	}
+}
+
+onMounted(() => {
+	window.addEventListener("keydown", onKeydown);
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("keydown", onKeydown);
+});
 </script>
 <style>
+.traumatoA .viewItemButton {
+	display: none;
+}
+
 .table_traumatoA:before,
 .traumatoA .printable:before {
 	content: "";
@@ -458,10 +484,6 @@ watch(showAssetsModal, (newVal) => {
 	line-height: 16px;
 }
 
-.traumatoA .printable table {
-	position: relative;
-}
-
 @media print {
 	.traumatoA .printable thead {
 		display: table-header-group;
@@ -470,10 +492,14 @@ watch(showAssetsModal, (newVal) => {
 	.printable .side {
 		position: fixed
 	}
+
+	.traumatoA .printable tbody>tr>td {
+		width: 100% !important;
+	}
 }
 
 .traumatoA .printable tbody {
-	width: calc(100% - 215px);
+	width: calc(100vw - 215px);
 	display: block;
 	margin-left: 215px;
 }
@@ -507,7 +533,13 @@ watch(showAssetsModal, (newVal) => {
 }
 
 .traumatoA .printable table {
-	break-after: always;
+	position: relative;
+	page-break-after: always;
+}
+
+.traumatoA .printable tbody>tr>td {
+	width: calc(100vw - 260px);
+	display: block;
 }
 
 /* Responsive: hide sidebar on small screens and make printable flow */
