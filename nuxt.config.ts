@@ -59,6 +59,9 @@ export default defineNuxtConfig({
 			type: "module",
 		},
 	},
+	routeRules: {
+		'/iniAPI/**': { proxy: "https://api.inicontent.com/**" }
+	},
 	extends:
 		process.env.NODE_ENV !== "production"
 			? [["../inicontent", { install: true }]]
